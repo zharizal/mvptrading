@@ -1,0 +1,33 @@
+import { MarketSnapshot } from "./types";
+
+export const mockSnapshot: MarketSnapshot = {
+  symbol: "BTCUSDT",
+  requested_symbol: "BTCUSDT",
+  resolved_symbol: "BTCUSDT",
+  symbol_mode: "fallback",
+  supports_symbol_switching: true,
+  price: 74894.72,
+  change_24h_pct: -0.4,
+  high_24h: 75514.52,
+  low_24h: 73545.0,
+  pivot: 74708.86,
+  atr_14_pct: 0.38,
+  support: 74480.0,
+  resistance: 75210.0,
+  zone_context: "MID_RANGE",
+  momentum_direction: "BULLISH",
+  momentum_strength: "WEAK",
+  momentum_change_pct: 0.42,
+  bias: "BULLISH",
+  score: 77,
+  signal: {
+    direction: "BUY",
+    entry: 74796.86,
+    stop_loss: 74355.97,
+    take_profit: 75148.0,
+    risk_reward: 1.0,
+    status: "WAIT_CONFIRMATION",
+  },
+  reasoning: "Trend is still constructive, but momentum is soft. Wait for confirmation near pivot before full conviction.",
+  updated_at: "2026-04-16T20:05:16Z",
+};
