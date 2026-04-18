@@ -12,7 +12,8 @@ from app.services.market_feed import get_live_market_snapshot
 
 logger = logging.getLogger(__name__)
 
-async def _resolve_pending() -> None:
+
+def _resolve_pending() -> None:
     try:
         with SessionLocal() as db:
             stmt = select(SignalEvent).where(SignalEvent.outcome == "pending")

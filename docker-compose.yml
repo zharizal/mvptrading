@@ -14,8 +14,13 @@ services:
       OPENROUTER_APP_NAME: ${OPENROUTER_APP_NAME:-mvptrading}
       LLM_MODEL: ${LLM_MODEL:-anthropic/claude-haiku-4.5}
       POLL_INTERVAL_SECONDS: ${POLL_INTERVAL_SECONDS:-5}
+      POLL_INTERVAL_FOREX_SECONDS: ${POLL_INTERVAL_FOREX_SECONDS:-30}
+      TWELVEDATA_API_KEY: ${TWELVEDATA_API_KEY:-}
+      DB_PATH: ${DB_PATH:-data/mvptrading.db}
     ports:
       - "8000:8000"
+    volumes:
+      - ./backend/data:/app/data
     healthcheck:
       test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8000/health"]
       interval: 30s
