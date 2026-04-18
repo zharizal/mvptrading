@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 
 import type { CatalogSymbol } from "@/lib/symbols";
 import type { WatchlistItem } from "@/lib/watchlist";
