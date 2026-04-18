@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -m pytest tests/test_reasoning_llm.py -v)",
+      "Bash(npm install:*)",
+      "Bash(pip install:*)",
+      "Bash(python -m pytest -q)",
+      "Bash(python -m pytest tests/test_providers.py -v)",
+      "Bash(npx tsc:*)",
+      "Bash(python -m pytest tests/test_journal.py -v)",
+      "Bash(python -m pytest tests/test_journal.py)",
+      "Bash(npm run:*)",
+      "Bash(git add:*)",
+      "Bash(git reset:*)",
+      "Bash(git commit:*)"
+    ]
+  }
+}

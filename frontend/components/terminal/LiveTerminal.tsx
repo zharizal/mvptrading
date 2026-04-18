@@ -26,11 +26,23 @@ import {
   type SuppressedRecentEventHistoryDismissState,
 } from "@/lib/recentEventMemory";
 import { persistBackendSymbol, readPersistedBackendSymbol, TERMINAL_SYMBOL_QUERY_KEY } from "@/lib/symbolPersistence";
+import {
+  flattenCatalog,
+  findCatalogEntry,
+  getSymbolCatalog,
+  type CatalogSymbol,
+} from "@/lib/symbols";
 import { DEFAULT_BACKEND_SYMBOL, type WatchlistItem, formatTerminalSymbol } from "@/lib/watchlist";
 import { connectMarketSocket } from "@/lib/websocket";
 import { MarketSnapshot } from "@/lib/types";
 import { useTransientHighlight } from "@/lib/useTransientHighlight";
+import { CommandPalette } from "./CommandPalette";
 import { TerminalLayout } from "./TerminalLayout";
+
+const PROVIDER_LABEL: Record<string, string> = {
+  binance: "Binance spot",
+  twelvedata: "TwelveData",
+};
 
 interface LiveTerminalProps {
   initialSnapshot: MarketSnapshot;
@@ -73,6 +85,8 @@ export function LiveTerminal({
   const [snapshot, setSnapshot] = useState<MarketSnapshot>(initialSnapshot);
   const [selectedWatchSymbol, setSelectedWatchSymbol] = useState<WatchlistItem>(initialLiveWatchItem);
   const [activeBackendSymbol, setActiveBackendSymbol] = useState<string>(initialSnapshot.resolved_symbol);
+  const [catalog, setCatalog] = useState<CatalogSymbol[] | null>(null);
+  const [catalogError, setCatalogError] = useState<string | null>(null);
   const [dataSource, setDataSource] = useState<"backend" | "mock-fallback">(initialDataSource);
   const [fetchError, setFetchError] = useState<string | undefined>(initialFetchError);
   const [connectionStatus, setConnectionStatus] = useState<"connecting" | "live" | "reconnecting" | "offline">("connecting");
@@ -100,6 +114,25 @@ export function LiveTerminal({
   const activeSuppressedRecentEventCount = activeSuppressedRecentEventEntry?.count ?? 0;
   const activeSuppressedRecentEventHistoryDismissedKeys =
     suppressedRecentEventHistoryDismissals[snapshot.resolved_symbol] ?? [];
+
+  useEffect(() => {
+    let cancelled = false;
+    getSymbolCatalog()
+      .then((response) => {
+        if (!cancelled) {
+          setCatalog(flattenCatalog(response));
+          setCatalogError(null);
+        }
+      })
+      .catch((err: unknown) => {
+        if (!cancelled) {
+          setCatalogError(err instanceof Error ? err.message : "catalog fetch failed");
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     if (eventMemoryHydratedRef.current) {
@@ -403,8 +436,16 @@ export function LiveTerminal({
     }
   };
 
+  const activeCatalogEntry = findCatalogEntry(catalog, snapshot.resolved_symbol);
+  const tradingviewSymbol = activeCatalogEntry?.tradingview_symbol ?? null;
+  const providerLabel = activeCatalogEntry
+    ? PROVIDER_LABEL[activeCatalogEntry.provider] ?? activeCatalogEntry.provider
+    : "Binance spot";
+
   return (
-    <TerminalLayout
+    <>
+      <CommandPalette catalog={catalog} onSelectWatchSymbol={handleSelectWatchSymbol} />
+      <TerminalLayout
       snapshot={snapshot}
       selectedWatchSymbol={selectedWatchSymbol}
       onSelectWatchSymbol={handleSelectWatchSymbol}
@@ -426,6 +467,11 @@ export function LiveTerminal({
           pushSuppressedRecentEventHistoryDismissal(current, snapshot.resolved_symbol, dismissedKey),
         )
       }
+      catalog={catalog}
+      catalogError={catalogError}
+      tradingviewSymbol={tradingviewSymbol}
+      providerLabel={providerLabel}
     />
+  </>
   );
 }

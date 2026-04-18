@@ -11,6 +11,8 @@ interface ChartPanelProps {
   latestTickLabel?: string;
   zoneFlash?: "active" | null;
   momentumFlash?: "active" | null;
+  tradingviewSymbol?: string | null;
+  providerLabel?: string;
 }
 
 const priceTone = {
@@ -36,8 +38,13 @@ export function ChartPanel({
   latestTickLabel,
   zoneFlash = null,
   momentumFlash = null,
+  tradingviewSymbol,
+  providerLabel = "Binance spot",
 }: ChartPanelProps) {
-  const resolvedChartSymbol = snapshot.resolved_symbol.replace("USDT", "/USDT");
+  // Display canonical form (slash) regardless of what the backend echoed.
+  const resolvedChartSymbol = snapshot.resolved_symbol.includes("/")
+    ? snapshot.resolved_symbol
+    : snapshot.resolved_symbol.replace(/-/g, "/").replace(/USDT$/, "/USDT");
   const isSwitchingBackendFocus = focusedSource === "backend-switchable" && !!focusedBackendSymbol && focusedBackendSymbol !== snapshot.resolved_symbol;
   const symbolLabel = focusedSource === "reference" || isSwitchingBackendFocus ? resolvedChartSymbol : focusedSymbol;
   const focusSubtitle = focusedSource === "reference"
@@ -76,7 +83,7 @@ export function ChartPanel({
 
       <div className="mt-4 flex flex-wrap items-center gap-2">
         <span className="rounded-full border border-terminal-border bg-black/10 px-3 py-1 text-xs font-medium text-terminal-muted">
-          Binance spot
+          {providerLabel}
         </span>
         <span className="rounded-full border border-cyan-500/20 bg-cyan-500/10 px-3 py-1 text-xs font-medium text-terminal-cyan">
           {symbolLabel}
@@ -106,7 +113,12 @@ export function ChartPanel({
           {snapshot.zone_context}
         </span>
       </div>
-      <TradingViewEmbed symbol={`BINANCE:${snapshot.resolved_symbol}`} />
+      <TradingViewEmbed
+        symbol={
+          tradingviewSymbol ??
+          `BINANCE:${snapshot.resolved_symbol.replace(/[-/]/g, "")}`
+        }
+      />
     </section>
   );
 }

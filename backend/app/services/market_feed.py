@@ -1,8 +1,26 @@
+"""Market data pipeline — facade over the provider layer.
+
+Kept as a single module for backward compatibility with existing tests.
+All provider-specific logic now lives under `app.providers.*`; this module
+only composes analytics + signal + reasoning on top of normalized data.
+"""
 from datetime import datetime, timezone
 from typing import Any
 
-import httpx
+# `httpx` is re-exported at module level so existing tests that monkeypatch
+# `app.services.market_feed.httpx.Client` continue to work. Binance calls
+# below go through the provider layer, which has its own httpx usage.
+import httpx  # noqa: F401 — kept for test monkeypatching compatibility
 
+from app.providers import registry as provider_registry
+from app.providers.binance import (
+    KLINE_INTERVAL as _KLINE_INTERVAL,
+    KLINE_LIMIT as _KLINE_LIMIT,
+    KLINES_URL as BINANCE_KLINES_URL,
+    TICKER_URL as BINANCE_TICKER_URL,
+    _normalize_candles as normalize_binance_candles,
+    _normalize_ticker as normalize_binance_ticker,
+)
 from app.schemas import SnapshotResponse
 from app.services.analytics import (
     Candle,
@@ -18,32 +36,8 @@ from app.services.analytics import (
 from app.services.reasoning import build_reasoning
 from app.services.signal_engine import build_signal
 
-BINANCE_TICKER_URL = "https://api.binance.com/api/v3/ticker/24hr"
-BINANCE_KLINES_URL = "https://api.binance.com/api/v3/klines"
-KLINE_INTERVAL = "15m"
-KLINE_LIMIT = 14
-
-
-def normalize_binance_ticker(raw_payload: dict[str, Any]) -> dict[str, float | str]:
-    return {
-        "symbol": raw_payload["symbol"],
-        "price": float(raw_payload["lastPrice"]),
-        "change_24h_pct": float(raw_payload["priceChangePercent"]),
-        "high_24h": float(raw_payload["highPrice"]),
-        "low_24h": float(raw_payload["lowPrice"]),
-    }
-
-
-def normalize_binance_candles(raw_candles: list[list[Any]]) -> list[Candle]:
-    return [
-        {
-            "open": float(candle[1]),
-            "high": float(candle[2]),
-            "low": float(candle[3]),
-            "close": float(candle[4]),
-        }
-        for candle in raw_candles
-    ]
+KLINE_INTERVAL = _KLINE_INTERVAL
+KLINE_LIMIT = _KLINE_LIMIT
 
 
 def build_live_snapshot(
@@ -138,6 +132,11 @@ def build_live_snapshot(
 
 
 def fetch_binance_market_context(symbol: str) -> tuple[dict[str, float | str], list[Candle]]:
+    """Legacy helper — fetch via Binance directly. Kept for tests.
+
+    Uses the module-level `httpx` symbol (which tests may monkeypatch) to
+    preserve behavior. New code should go through `provider_registry.resolve`.
+    """
     with httpx.Client(timeout=10.0) as client:
         ticker_response = client.get(BINANCE_TICKER_URL, params={"symbol": symbol})
         ticker_response.raise_for_status()
@@ -150,11 +149,26 @@ def fetch_binance_market_context(symbol: str) -> tuple[dict[str, float | str], l
         klines_response.raise_for_status()
         raw_klines = klines_response.json()
 
-    normalized_ticker = normalize_binance_ticker(raw_ticker)
-    normalized_candles = normalize_binance_candles(raw_klines)
-    return normalized_ticker, normalized_candles
+    return normalize_binance_ticker(raw_ticker), normalize_binance_candles(raw_klines)
 
 
 def get_live_market_snapshot(symbol: str) -> SnapshotResponse:
-    normalized, candles = fetch_binance_market_context(symbol)
+    """Fetch live snapshot for any canonical / legacy symbol.
+
+    Routing:
+      - `BTC/USDT` or `BTC-USDT` → DB lookup → provider from catalog
+      - `BTCUSDT` (legacy, no separator) → Binance fast path
+    """
+    upper = symbol.upper()
+    if "/" in upper or "-" in upper:
+        provider, canonical = provider_registry.resolve(upper)
+        normalized, candles = provider.fetch_market_context(canonical)
+        # Echo back the user-provided form (with slash normalized) so clients
+        # see a consistent `resolved_symbol`.
+        display_symbol = upper.replace("-", "/")
+        normalized = {**normalized, "symbol": display_symbol}
+        return build_live_snapshot(normalized, candles=candles, requested_symbol=symbol)
+
+    # Legacy path — behavior unchanged for existing BTCUSDT callers.
+    normalized, candles = fetch_binance_market_context(upper)
     return build_live_snapshot(normalized, candles=candles, requested_symbol=symbol)

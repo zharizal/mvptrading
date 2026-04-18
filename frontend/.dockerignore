@@ -1,0 +1,10 @@
+node_modules
+.next
+.next-cache
+.env
+.env.local
+tests
+coverage
+.git
+.github
+*.md

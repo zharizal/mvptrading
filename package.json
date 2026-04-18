@@ -1,0 +1,21 @@
+{
+  "name": "trading-terminal-mvp",
+  "private": true,
+  "version": "0.2.0",
+  "description": "AI Trading Terminal MVP — FastAPI + Next.js, live Binance feed",
+  "scripts": {
+    "install:frontend": "cd frontend && npm install",
+    "install:backend": "cd backend && py -m pip install -r requirements.txt",
+    "install:all": "npm run install:backend && npm run install:frontend",
+    "dev:backend": "cd backend && py -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:all": "concurrently -n backend,frontend -c cyan,magenta \"npm:dev:backend\" \"npm:dev:frontend\"",
+    "test:backend": "cd backend && py -m pytest -q",
+    "test:frontend": "cd frontend && npx tsc --noEmit",
+    "test:all": "npm run test:backend && npm run test:frontend",
+    "build:frontend": "cd frontend && npm run build"
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.1"
+  }
+}

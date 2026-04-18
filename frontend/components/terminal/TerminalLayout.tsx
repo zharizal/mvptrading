@@ -1,11 +1,12 @@
 import { type RecentEvent } from "@/lib/recentEventMemory";
+import { type CatalogSymbol } from "@/lib/symbols";
 import { MarketSnapshot } from "@/lib/types";
 import { type WatchlistItem } from "@/lib/watchlist";
 import { ChartPanel } from "./ChartPanel";
+import { ChartTabs } from "./ChartTabs";
 import { MetricCard } from "./MetricCard";
 import { RecentEventRail } from "./RecentEventRail";
 import { SentimentPanel } from "./SentimentPanel";
-import { SignalPanel } from "./SignalPanel";
 import { TradeSetupPanel } from "./TradeSetupPanel";
 import { WatchlistPanel } from "./WatchlistPanel";
 
@@ -27,6 +28,10 @@ interface TerminalLayoutProps {
   suppressedRecentEventLastUpdatedAt?: number;
   suppressedRecentEventHistoryDismissedKey?: string[];
   onDismissSuppressedRecentEventHistory?: (dismissedKey: string) => void;
+  catalog?: CatalogSymbol[] | null;
+  catalogError?: string | null;
+  tradingviewSymbol?: string | null;
+  providerLabel?: string;
 }
 
 const connectionTone = {
@@ -61,6 +66,10 @@ export function TerminalLayout({
   suppressedRecentEventLastUpdatedAt,
   suppressedRecentEventHistoryDismissedKey,
   onDismissSuppressedRecentEventHistory,
+  catalog = null,
+  catalogError,
+  tradingviewSymbol,
+  providerLabel,
 }: TerminalLayoutProps) {
   const statusTone = dataSource === "backend" ? "text-terminal-green" : "text-yellow-300";
   const statusLabel = dataSource === "backend" ? "Backend connected" : "Mock fallback active";
@@ -151,6 +160,8 @@ export function TerminalLayout({
               selectedSymbol={selectedWatchSymbol.symbol}
               onSelectSymbol={onSelectWatchSymbol}
               priceFlash={priceFlash}
+              catalog={catalog}
+              catalogError={catalogError}
             />
             <SentimentPanel snapshot={snapshot} momentumFlash={momentumFlash} />
           </div>
@@ -165,8 +176,10 @@ export function TerminalLayout({
               latestTickLabel={latestTickLabel}
               zoneFlash={zoneFlash}
               momentumFlash={momentumFlash}
+              tradingviewSymbol={tradingviewSymbol}
+              providerLabel={providerLabel}
             />
-            <SignalPanel snapshot={snapshot} signalFlash={signalFlash} zoneFlash={zoneFlash} />
+            <ChartTabs snapshot={snapshot} signalFlash={signalFlash} zoneFlash={zoneFlash} />
           </div>
 
           <div className="space-y-6">
