@@ -40,8 +40,8 @@ def test_normalize_binance_candles_maps_ohlc_fields():
     result = normalize_binance_candles(raw_candles)
 
     assert result == [
-        {"open": 100.0, "high": 110.0, "low": 95.0, "close": 108.0},
-        {"open": 108.0, "high": 112.0, "low": 104.0, "close": 106.0},
+        {"open": 100.0, "high": 110.0, "low": 95.0, "close": 108.0, "volume": 0.0},
+        {"open": 108.0, "high": 112.0, "low": 104.0, "close": 106.0, "volume": 0.0},
     ]
 
 

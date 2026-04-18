@@ -16,8 +16,9 @@ interface ChartPanelProps {
 
 export function ChartPanel({
   snapshot,
+  tradingviewSymbol,
 }: ChartPanelProps) {
   return (
-    <NativeChart snapshot={snapshot} />
+    <NativeChart snapshot={snapshot} tradingviewSymbol={tradingviewSymbol} />
   );
 }
