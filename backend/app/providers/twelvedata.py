@@ -58,6 +58,7 @@ def _normalize_candles(raw: dict[str, Any]) -> list[Candle]:
                 "high": float(row["high"]),
                 "low": float(row["low"]),
                 "close": float(row["close"]),
+                "volume": float(row.get("volume", 0)),
             })
         except (KeyError, TypeError, ValueError):
             continue

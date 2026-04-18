@@ -10,18 +10,18 @@ const config: Config = {
     extend: {
       colors: {
         terminal: {
-          bg: "#050505",
-          panel: "#0f0f11",
-          border: "#222222",
-          muted: "#888888",
-          text: "#e0e0e0",
-          green: "#00c853",
-          red: "#ff3d00",
-          cyan: "#00e5ff",
+          bg: "#0A0E17",
+          panel: "#131722",
+          border: "#1E222D",
+          muted: "#787B86",
+          text: "#D1D4DC",
+          green: "#089981",
+          red: "#F23645",
+          cyan: "#2962FF",
         },
       },
       boxShadow: {
-        glow: "0 0 0 1px rgba(255,255,255,0.05), 0 4px 20px rgba(0,0,0,0.5)",
+        glow: "none",
       },
     },
   },

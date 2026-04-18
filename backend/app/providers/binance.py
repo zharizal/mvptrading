@@ -35,6 +35,7 @@ def _normalize_candles(raw: list[list[Any]]) -> list[Candle]:
             "high": float(c[2]),
             "low": float(c[3]),
             "close": float(c[4]),
+            "volume": float(c[5]),
         }
         for c in raw
     ]

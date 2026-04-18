@@ -4,7 +4,6 @@ import { MarketSnapshot } from "@/lib/types";
 import { type WatchlistItem } from "@/lib/watchlist";
 import { ChartPanel } from "./ChartPanel";
 import { ChartTabs } from "./ChartTabs";
-import { MetricCard } from "./MetricCard";
 import { RecentEventRail } from "./RecentEventRail";
 import { SentimentPanel } from "./SentimentPanel";
 import { TradeSetupPanel } from "./TradeSetupPanel";
@@ -34,25 +33,10 @@ interface TerminalLayoutProps {
   providerLabel?: string;
 }
 
-const connectionTone = {
-  connecting: "text-yellow-200 border-yellow-500/20 bg-yellow-500/10",
-  live: "text-terminal-green border-green-500/20 bg-green-500/10",
-  reconnecting: "text-yellow-200 border-yellow-500/20 bg-yellow-500/10",
-  offline: "text-terminal-red border-red-500/20 bg-red-500/10",
-};
-
-const connectionLabel = {
-  connecting: "Socket connecting",
-  live: "Realtime live",
-  reconnecting: "Reconnecting",
-  offline: "Socket offline",
-};
-
 export function TerminalLayout({
   snapshot,
   selectedWatchSymbol,
   onSelectWatchSymbol,
-  dataSource = "backend",
   fetchError,
   connectionStatus = "connecting",
   priceFlash = null,
@@ -71,75 +55,80 @@ export function TerminalLayout({
   tradingviewSymbol,
   providerLabel,
 }: TerminalLayoutProps) {
-  const statusTone = dataSource === "backend" ? "text-terminal-green" : "text-yellow-300";
-  const statusLabel = dataSource === "backend" ? "Backend connected" : "Mock fallback active";
-  const focusModeLabel = selectedWatchSymbol.source === "reference"
-    ? "preview"
-    : selectedWatchSymbol.source === "backend-switchable" && selectedWatchSymbol.backendSymbol !== snapshot.resolved_symbol
-      ? "switching"
-      : snapshot.symbol_mode;
+  const lastCandle = snapshot.candles?.[snapshot.candles.length - 1];
 
   return (
-    <main className="min-h-screen bg-terminal-bg p-4 text-terminal-text">
-      <div className="mx-auto max-w-[1600px]">
-        <header className="mb-4 flex flex-col gap-2 rounded-xl border border-terminal-border bg-terminal-panel px-4 py-3 md:flex-row md:items-center md:justify-between">
-          <div className="flex items-center gap-3">
-            <span className="h-2 w-2 rounded-full bg-terminal-cyan" />
-            <h1 className="text-sm font-semibold tracking-wide">Terminal MVP</h1>
+    <main className="flex h-screen w-full flex-col overflow-hidden bg-terminal-bg text-terminal-text font-sans">
+      {/* Top Navbar */}
+      <header className="flex h-10 shrink-0 items-center justify-between border-b border-terminal-border bg-terminal-panel px-3">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <span className="h-1.5 w-1.5 rounded-full bg-terminal-cyan" />
+            <h1 className="text-[11px] font-semibold tracking-widest uppercase">Trading Terminal</h1>
           </div>
-          <div className="flex flex-wrap items-center gap-2 md:justify-end">
-            <span className={`flex items-center gap-1.5 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${connectionTone[connectionStatus]}`}>
-              <span className={`h-1.5 w-1.5 rounded-full ${connectionStatus === "live" ? "bg-terminal-green" : "bg-current"}`} />
-              {connectionLabel[connectionStatus]}
+          {fetchError ? (
+            <span className="rounded bg-yellow-500/10 px-2 py-0.5 text-[9px] text-yellow-200">
+              Fallback: {fetchError}
             </span>
-            <span className="px-2 py-0.5 text-[10px] font-medium text-terminal-muted border-l border-terminal-border">
-              REQ: {snapshot.requested_symbol}
+          ) : null}
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 text-[9px] uppercase tracking-widest text-terminal-muted">
+            <span className="flex items-center gap-1.5">
+               <span className={`h-1.5 w-1.5 rounded-full ${connectionStatus === "live" ? "bg-terminal-green" : "bg-yellow-500"}`} />
+               {connectionStatus}
             </span>
-            {latestTickLabel ? (
-              <span className="px-2 py-0.5 text-[10px] font-medium text-terminal-muted border-l border-terminal-border">
-                {latestTickLabel}
-              </span>
-            ) : null}
+            <span className="border-l border-terminal-border pl-2">REQ: {snapshot.requested_symbol}</span>
+            <span className="border-l border-terminal-border pl-2">{latestTickLabel}</span>
           </div>
-        </header>
+        </div>
+      </header>
 
-        {fetchError ? (
-          <div className="mb-4 rounded border border-yellow-500/20 bg-yellow-500/10 px-3 py-2 text-xs text-yellow-200">
-            Fallback Mode: {fetchError}
-          </div>
-        ) : null}
+      {/* Main Layout 3-Columns Edge-to-Edge */}
+      <div className="flex flex-1 overflow-hidden">
 
-        <section className="mb-4 grid gap-3 md:grid-cols-2 xl:grid-cols-6">
-          <MetricCard
-            label="Price"
-            value={`$${snapshot.price.toLocaleString()}`}
-            accent={snapshot.change_24h_pct >= 0 ? "green" : "red"}
-            changeHint={`${snapshot.change_24h_pct >= 0 ? "+" : ""}${snapshot.change_24h_pct.toFixed(2)}%`}
-            flash={priceFlash}
+        {/* Left Sidebar: Watchlist */}
+        <aside className="flex w-[240px] shrink-0 flex-col overflow-y-auto border-r border-terminal-border bg-terminal-panel">
+          <WatchlistPanel
+            activeSymbol={snapshot.resolved_symbol}
+            activePrice={snapshot.price}
+            activeChangePct={snapshot.change_24h_pct}
+            selectedSymbol={selectedWatchSymbol.symbol}
+            onSelectSymbol={onSelectWatchSymbol}
+            priceFlash={priceFlash}
+            catalog={catalog}
+            catalogError={catalogError}
           />
-          <MetricCard label="24H High" value={`$${snapshot.high_24h.toLocaleString()}`} />
-          <MetricCard label="24H Low" value={`$${snapshot.low_24h.toLocaleString()}`} />
-          <MetricCard label="Pivot" value={`$${snapshot.pivot.toLocaleString()}`} accent="cyan" changeHint={`ATR ${snapshot.atr_14_pct.toFixed(2)}%`} />
-          <MetricCard label="Support" value={`$${snapshot.support.toLocaleString()}`} accent="green" changeHint={snapshot.zone_context === "SUPPORT" ? "Active" : undefined} />
-          <MetricCard label="Resistance" value={`$${snapshot.resistance.toLocaleString()}`} accent="red" changeHint={snapshot.zone_context === "RESISTANCE" ? "Active" : undefined} />
-        </section>
+        </aside>
 
-        <section className="grid gap-6 xl:grid-cols-[280px_minmax(0,1fr)_340px]">
-          <div className="space-y-6">
-            <WatchlistPanel
-              activeSymbol={snapshot.resolved_symbol}
-              activePrice={snapshot.price}
-              activeChangePct={snapshot.change_24h_pct}
-              selectedSymbol={selectedWatchSymbol.symbol}
-              onSelectSymbol={onSelectWatchSymbol}
-              priceFlash={priceFlash}
-              catalog={catalog}
-              catalogError={catalogError}
-            />
-            <SentimentPanel snapshot={snapshot} momentumFlash={momentumFlash} />
+        {/* Center Content: Chart & Tabs */}
+        <section className="flex flex-1 flex-col overflow-hidden bg-[#0A0E17]">
+          {/* Minimalist Info Strip (Replacing MetricCards) */}
+          <div className="flex h-10 shrink-0 items-center gap-4 border-b border-terminal-border px-3 text-[11px] tabular-nums bg-terminal-panel">
+             <div className="flex items-baseline gap-2">
+                <span className="font-bold text-terminal-text text-sm">{selectedWatchSymbol.symbol}</span>
+                <span className={`font-semibold ${snapshot.change_24h_pct >= 0 ? "text-terminal-green" : "text-terminal-red"}`}>
+                  {snapshot.change_24h_pct >= 0 ? "+" : ""}{snapshot.change_24h_pct.toFixed(2)}%
+                </span>
+             </div>
+             <div className="h-4 w-px bg-terminal-border" />
+             <div className="flex gap-3 text-terminal-muted">
+                <span>O <span className="text-terminal-text">{lastCandle?.open.toFixed(2) || "—"}</span></span>
+                <span>H <span className="text-terminal-text">{lastCandle?.high.toFixed(2) || "—"}</span></span>
+                <span>L <span className="text-terminal-text">{lastCandle?.low.toFixed(2) || "—"}</span></span>
+                <span>C <span className="text-terminal-text">{lastCandle?.close.toFixed(2) || "—"}</span></span>
+                <span>V <span className="text-terminal-text">{lastCandle?.volume.toFixed(2) || "—"}</span></span>
+             </div>
+             <div className="h-4 w-px bg-terminal-border" />
+             <div className="flex gap-3 text-terminal-muted">
+                <span>Pivot <span className="text-terminal-cyan">{snapshot.pivot.toLocaleString()}</span></span>
+                <span>Sup <span className="text-terminal-green">{snapshot.support.toLocaleString()}</span></span>
+                <span>Res <span className="text-terminal-red">{snapshot.resistance.toLocaleString()}</span></span>
+             </div>
           </div>
 
-          <div className="space-y-6">
+          {/* Main Chart Area */}
+          <div className="flex-1 overflow-hidden relative">
             <ChartPanel
               snapshot={snapshot}
               focusedSymbol={selectedWatchSymbol.symbol}
@@ -152,11 +141,21 @@ export function TerminalLayout({
               tradingviewSymbol={tradingviewSymbol}
               providerLabel={providerLabel}
             />
-            <ChartTabs snapshot={snapshot} signalFlash={signalFlash} zoneFlash={zoneFlash} />
           </div>
 
-          <div className="space-y-6">
+          {/* Bottom Tabs Area */}
+          <div className="h-[35vh] min-h-[250px] shrink-0 border-t border-terminal-border overflow-y-auto bg-terminal-panel p-2">
+            <ChartTabs snapshot={snapshot} signalFlash={signalFlash} zoneFlash={zoneFlash} />
+          </div>
+        </section>
+
+        {/* Right Sidebar: Execution & Sentiment */}
+        <aside className="flex w-[280px] shrink-0 flex-col overflow-y-auto border-l border-terminal-border bg-terminal-panel">
+          <div className="p-2 space-y-2">
             <TradeSetupPanel snapshot={snapshot} />
+            <SentimentPanel snapshot={snapshot} momentumFlash={momentumFlash} />
+          </div>
+          <div className="flex-1 border-t border-terminal-border mt-2 p-2">
             <RecentEventRail
               events={recentEvents}
               latestTickLabel={latestTickLabel}
@@ -167,7 +166,7 @@ export function TerminalLayout({
               onDismissSuppressedRecentEventHistory={onDismissSuppressedRecentEventHistory}
             />
           </div>
-        </section>
+        </aside>
       </div>
     </main>
   );
