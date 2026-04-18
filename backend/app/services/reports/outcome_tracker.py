@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.core.database import SessionLocal
 from app.db.models import SignalEvent
-from app.services.market_feed import get_live_market_snapshot
+from app.providers import registry
 
 logger = logging.getLogger(__name__)
 
@@ -30,29 +30,36 @@ def _resolve_pending() -> None:
                     row.outcome_at = now
                     continue
 
-                # Fetch live price. (Ideally we'd use the poller cache if active,
-                # but fetching is fine for MVP background task).
+                # Fetch live data explicitly to get candles (high/low).
                 try:
-                    snap = get_live_market_snapshot(row.symbol)
-                    current_price = snap.price
+                    provider, canonical = registry.resolve(row.symbol)
+                    ticker, candles = provider.fetch_market_context(canonical)
+
+                    if not candles:
+                        continue
+
+                    # Use the latest candle's high/low to determine hits instead of a point-in-time price
+                    latest_candle = candles[-1]
+                    high_price = latest_candle["high"]
+                    low_price = latest_candle["low"]
 
                     if row.direction == "BUY":
-                        if current_price >= row.take_profit:
+                        if high_price >= row.take_profit:
                             row.outcome = "hit_tp"
-                            row.outcome_price = current_price
+                            row.outcome_price = row.take_profit
                             row.outcome_at = now
-                        elif current_price <= row.stop_loss:
+                        elif low_price <= row.stop_loss:
                             row.outcome = "hit_sl"
-                            row.outcome_price = current_price
+                            row.outcome_price = row.stop_loss
                             row.outcome_at = now
                     elif row.direction == "SELL":
-                        if current_price <= row.take_profit:
+                        if low_price <= row.take_profit:
                             row.outcome = "hit_tp"
-                            row.outcome_price = current_price
+                            row.outcome_price = row.take_profit
                             row.outcome_at = now
-                        elif current_price >= row.stop_loss:
+                        elif high_price >= row.stop_loss:
                             row.outcome = "hit_sl"
-                            row.outcome_price = current_price
+                            row.outcome_price = row.stop_loss
                             row.outcome_at = now
                 except Exception:
                     continue  # skip this symbol on fetch error

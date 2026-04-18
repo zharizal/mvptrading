@@ -27,9 +27,17 @@ def test_resolve_pending_marks_hit_tp(tmp_path, monkeypatch):
     session_local = _make_session_factory(tmp_path)
     monkeypatch.setattr(outcome_tracker, "SessionLocal", session_local)
     monkeypatch.setattr(
-        outcome_tracker,
-        "get_live_market_snapshot",
-        lambda symbol: SimpleNamespace(price=105.0),
+        outcome_tracker.registry,
+        "resolve",
+        lambda symbol: (
+            SimpleNamespace(
+                fetch_market_context=lambda s: (
+                    {},
+                    [{"open": 100, "high": 105, "low": 99, "close": 104}]
+                )
+            ),
+            symbol,
+        ),
     )
 
     with session_local() as db:
@@ -55,7 +63,7 @@ def test_resolve_pending_marks_hit_tp(tmp_path, monkeypatch):
     with session_local() as db:
         row = db.execute(select(SignalEvent)).scalar_one()
         assert row.outcome == "hit_tp"
-        assert row.outcome_price == 105.0
+        assert row.outcome_price == 104.0
         assert row.outcome_at is not None
 
 

@@ -118,8 +118,10 @@ export function SetupQualityPanel({ snapshot }: { snapshot: MarketSnapshot }) {
         {checks.map((check) => (
           <div key={check.label} className={`rounded-xl border border-terminal-border px-3 py-3 ${statusTone[check.status].card}`}>
             <div className="flex items-center justify-between gap-2">
-              <span className="text-xs font-semibold uppercase tracking-[0.16em] text-terminal-muted">{check.label}</span>
-              <span className={`inline-flex rounded-full border px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] ${statusTone[check.status].chip}`}>
+              <span className="truncate text-xs font-semibold uppercase tracking-[0.16em] text-terminal-muted" title={check.label}>
+                {check.label}
+              </span>
+              <span className={`shrink-0 inline-flex rounded-full border px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] ${statusTone[check.status].chip}`}>
                 {check.status}
               </span>
             </div>

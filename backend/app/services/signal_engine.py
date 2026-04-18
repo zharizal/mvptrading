@@ -47,33 +47,39 @@ def build_signal(
     too_close_to_pivot = distance_to_pivot_pct <= 0.15
 
     if strong_bullish and not too_close_to_pivot:
-        entry = round(price * 0.998, 2)
+        # Limit entry slightly below current price (pullback entry), scaled by ATR.
+        # e.g. If ATR is 1.5%, we wait for a 0.3% (1/5th of ATR) pullback.
+        entry_pullback_pct = (atr_14_pct / 5.0) / 100.0
+        entry = round(price * (1.0 - entry_pullback_pct), 5)
+
         atr_stop = entry - atr_move
         atr_take_profit = entry + (atr_move * 1.8)
         if zone_context == "SUPPORT":
-            stop_loss = round(max(atr_stop, support - structure_buffer), 2)
-            take_profit = round(min(atr_take_profit, resistance - structure_buffer), 2)
+            stop_loss = round(max(atr_stop, support - structure_buffer), 5)
+            take_profit = round(min(atr_take_profit, resistance - structure_buffer), 5)
         else:
-            stop_loss = round(max(atr_stop, resistance - structure_buffer), 2)
-            take_profit = round(atr_take_profit, 2)
+            stop_loss = round(max(atr_stop, resistance - structure_buffer), 5)
+            take_profit = round(atr_take_profit, 5)
         status = "LIVE_FEED"
         direction = "BUY"
     elif strong_bearish and not too_close_to_pivot:
-        entry = round(price * 1.002, 2)
+        entry_pullback_pct = (atr_14_pct / 5.0) / 100.0
+        entry = round(price * (1.0 + entry_pullback_pct), 5)
+
         atr_stop = entry + atr_move
         atr_take_profit = entry - (atr_move * 1.8)
         if zone_context == "RESISTANCE":
-            stop_loss = round(min(atr_stop, resistance + structure_buffer), 2)
-            take_profit = round(max(atr_take_profit, support + structure_buffer), 2)
+            stop_loss = round(min(atr_stop, resistance + structure_buffer), 5)
+            take_profit = round(max(atr_take_profit, support + structure_buffer), 5)
         else:
-            stop_loss = round(min(atr_stop, support + structure_buffer), 2)
-            take_profit = round(atr_take_profit, 2)
+            stop_loss = round(min(atr_stop, support + structure_buffer), 5)
+            take_profit = round(atr_take_profit, 5)
         status = "LIVE_FEED"
         direction = "SELL"
     else:
-        entry = round(price, 2)
-        stop_loss = round(price - atr_move, 2)
-        take_profit = round(price + atr_move, 2)
+        entry = round(price, 5)
+        stop_loss = round(price - atr_move, 5)
+        take_profit = round(price + atr_move, 5)
         status = "WAIT_CONFIRMATION"
         direction = "WAIT"
 
