@@ -31,7 +31,7 @@ const ASSET_CLASS_LABELS: Record<AssetClass, string> = {
 const ASSET_CLASS_ICONS: Record<AssetClass, string> = {
   crypto: "₿",
   commodity: "◆",
-  forex: "¥",
+  forex: "$",
 };
 
 function formatPrice(symbol: string, price: number) {

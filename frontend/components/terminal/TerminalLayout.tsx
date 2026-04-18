@@ -135,6 +135,11 @@ export function TerminalLayout({
                 <span className={`font-semibold ${snapshot.change_24h_pct >= 0 ? "text-terminal-green" : "text-terminal-red"}`}>
                   {snapshot.change_24h_pct >= 0 ? "+" : ""}{snapshot.change_24h_pct.toFixed(2)}%
                 </span>
+                {snapshot.symbol_mode === "fallback" ? (
+                  <span className="rounded border border-yellow-500/40 bg-yellow-500/10 px-1.5 py-0 text-[9px] font-bold uppercase tracking-widest text-yellow-300" title="Live feed unavailable — showing proportional seed data">
+                    SEED
+                  </span>
+                ) : null}
              </div>
              <div className="h-4 w-px bg-terminal-border" />
              <div className="flex gap-3 text-terminal-muted">
@@ -142,7 +147,10 @@ export function TerminalLayout({
                 <span>H <span className="text-terminal-text">{fmt(lastCandle?.high, prec)}</span></span>
                 <span>L <span className="text-terminal-text">{fmt(lastCandle?.low, prec)}</span></span>
                 <span>C <span className="text-terminal-text">{fmt(lastCandle?.close, prec)}</span></span>
-                <span>V <span className="text-terminal-text">{lastCandle?.volume ? lastCandle.volume.toLocaleString(undefined, { maximumFractionDigits: 0 }) : "—"}</span></span>
+                {/* Volume only relevant for crypto — TwelveData doesn't return it for forex/commodities */}
+                {lastCandle?.volume && lastCandle.volume > 0 ? (
+                  <span>V <span className="text-terminal-text">{lastCandle.volume.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span></span>
+                ) : null}
              </div>
              <div className="h-4 w-px bg-terminal-border" />
              <div className="flex gap-3 text-terminal-muted">

@@ -15,6 +15,15 @@ const zoneStyles = {
   MID_RANGE: "border-terminal-border bg-black/10 text-terminal-muted",
 };
 
+// Just the text color, for inline displays (not a chip).
+const zoneTextColor = {
+  SUPPORT: "text-terminal-green",
+  RESISTANCE: "text-terminal-red",
+  BREAKOUT: "text-terminal-cyan",
+  BREAKDOWN: "text-terminal-red",
+  MID_RANGE: "text-terminal-muted",
+};
+
 export function SignalPanel({ snapshot, signalFlash = null, zoneFlash = null }: { snapshot: MarketSnapshot; signalFlash?: "active" | null; zoneFlash?: "active" | null }) {
   const statusTone = snapshot.signal.status === "LIVE_FEED" ? "text-terminal-cyan" : "text-yellow-200";
 
@@ -46,7 +55,7 @@ export function SignalPanel({ snapshot, signalFlash = null, zoneFlash = null }: 
         <div className={`rounded border border-terminal-border bg-black/20 p-2 ${zoneFlash === "active" ? "micro-pulse-cyan" : ""}`}>
           <p className="text-[10px] uppercase tracking-widest text-terminal-muted">Zone</p>
           <div className="mt-1">
-            <span className={`truncate text-xs font-medium ${zoneStyles[snapshot.zone_context].replace("border", "border-transparent bg-transparent px-0 py-0")}`}>
+            <span className={`truncate text-xs font-medium ${zoneTextColor[snapshot.zone_context]}`}>
               {snapshot.zone_context}
             </span>
           </div>
