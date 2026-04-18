@@ -1,5 +1,4 @@
 import { MarketSnapshot } from "@/lib/types";
-import { PremiumPanelHeader } from "./PremiumPanelHeader";
 
 const statusTone = {
   passed: {

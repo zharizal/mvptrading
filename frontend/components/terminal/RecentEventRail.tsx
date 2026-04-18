@@ -22,7 +22,6 @@ import {
   type RecentEvent,
   type SuppressedRecentEventHistoryDismissState,
 } from "@/lib/recentEventMemory";
-import { PremiumPanelHeader } from "./PremiumPanelHeader";
 
 const toneMap = {
   info: {
@@ -116,38 +115,29 @@ export function RecentEventRail({
   }, [events.length, hasTimedHiddenHistoryBadge, hiddenHistoryCount, suppressedRecentEventCount]);
 
   return (
-    <section className="premium-glass rounded-2xl border border-terminal-border bg-terminal-panel p-4 shadow-glow">
-      <PremiumPanelHeader
-        eyebrow="Recent Events"
-        title={`Signal History · ${resolvedSymbol}`}
-        subtitle="Per-symbol event rail for structure, momentum, and signal changes."
-        rightContent={
-          <div className="flex flex-wrap items-center gap-2">
-            {suppressedRecentEventCount > 0 && suppressedRecentEventLastUpdatedAt ? (
-              <span className="rounded-full border border-terminal-border bg-black/10 px-3 py-1 text-xs font-medium text-terminal-muted">
-                {formatSuppressedRecentEventBadgeLabel(
-                  { count: suppressedRecentEventCount, lastUpdatedAt: suppressedRecentEventLastUpdatedAt },
-                  relativeNow,
-                )}
-              </span>
-            ) : null}
-            {hiddenHistoryCount > 0 && hiddenHistoryBadgeLabel ? (
-              <span className="rounded-full border border-terminal-border bg-black/10 px-3 py-1 text-xs font-medium text-terminal-muted">
-                {hiddenHistoryBadgeLabel}
-              </span>
-            ) : null}
-            {latestTickLabel ? (
-              <span className="rounded-full border border-terminal-border bg-black/10 px-3 py-1 text-xs font-medium text-terminal-muted">
-                Last tick {latestTickLabel}
-              </span>
-            ) : null}
-          </div>
-        }
-      />
+    <section className="rounded border border-terminal-border bg-terminal-panel p-3">
+      <div className="mb-3 flex items-center justify-between border-b border-terminal-border pb-2">
+        <h2 className="text-xs font-semibold uppercase tracking-widest text-terminal-muted">Event Rail</h2>
+        <div className="flex flex-wrap items-center gap-1.5">
+          {suppressedRecentEventCount > 0 && suppressedRecentEventLastUpdatedAt ? (
+            <span className="rounded border border-terminal-border bg-black/20 px-2 py-0.5 text-[9px] font-medium text-terminal-muted">
+              {formatSuppressedRecentEventBadgeLabel(
+                { count: suppressedRecentEventCount, lastUpdatedAt: suppressedRecentEventLastUpdatedAt },
+                relativeNow,
+              )}
+            </span>
+          ) : null}
+          {hiddenHistoryCount > 0 && hiddenHistoryBadgeLabel ? (
+            <span className="rounded border border-terminal-border bg-black/20 px-2 py-0.5 text-[9px] font-medium text-terminal-muted">
+              {hiddenHistoryBadgeLabel}
+            </span>
+          ) : null}
+        </div>
+      </div>
 
-      <div className="mt-4 space-y-3">
+      <div className="space-y-2">
         {suppressedHistoryEntry && !isSuppressedHistoryDismissed ? (
-          <div className="flex items-start justify-between gap-3 rounded-xl border border-terminal-border/70 bg-black/5 px-3 py-2 text-xs text-terminal-muted">
+          <div className="flex items-start justify-between gap-2 rounded border border-terminal-border/70 bg-black/20 px-2 py-1.5 text-[10px] text-terminal-muted">
             <span>
               {formatSuppressedRecentEventHistoryLabel(suppressedHistoryEntry, suppressedHistorySourceLabel)}
             </span>
@@ -155,7 +145,7 @@ export function RecentEventRail({
               <button
                 type="button"
                 aria-label="Dismiss suppression history row"
-                className="rounded-full border border-terminal-border bg-black/10 px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-terminal-muted transition hover:border-terminal-muted hover:text-terminal-text"
+                className="rounded border border-terminal-border bg-black/10 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-widest text-terminal-muted transition hover:border-terminal-muted hover:text-terminal-text"
                 onClick={() => {
                   setDismissedHistoryKeys((current) =>
                     pushSuppressedRecentEventHistoryDismissal(current, resolvedSymbol, suppressedHistoryDismissKey),
@@ -169,36 +159,36 @@ export function RecentEventRail({
           </div>
         ) : null}
         {events.length === 0 ? (
-          <div className="premium-glass rounded-xl border border-terminal-border bg-black/10 px-3 py-3 text-sm text-terminal-muted shadow-glow">
-            Belum ada event tersimpan buat {resolvedSymbol}. Nunggu perubahan pertama dari websocket live feed...
+          <div className="rounded border border-terminal-border bg-black/20 px-2 py-3 text-xs text-terminal-muted text-center">
+            Menunggu perubahan feed live...
           </div>
         ) : (
           prioritizedEvents.map((event) => (
-            <div key={event.id} className="premium-glass rounded-xl border border-terminal-border bg-black/10 px-3 py-3 shadow-glow">
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex items-start gap-3">
-                  <span className={`mt-1 h-2.5 w-2.5 rounded-full ${toneMap[event.tone].dot}`} />
+            <div key={event.id} className="rounded border border-terminal-border bg-black/20 p-2 hover:bg-white/5 transition-colors">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex items-start gap-2">
+                  <span className={`mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full ${toneMap[event.tone].dot}`} />
                   <div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className={`rounded-full border px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] ${toneMap[event.tone].chip}`}>
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <span className={`rounded border px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-widest ${toneMap[event.tone].chip}`}>
                         {event.label}
                       </span>
                       {isRecentEventPinned(event, relativeNow) ? (
-                        <span className="rounded-full border border-cyan-500/20 bg-cyan-500/10 px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-terminal-cyan">
+                        <span className="rounded border border-cyan-500/20 bg-cyan-500/10 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-widest text-terminal-cyan">
                           {getRecentEventPinRemainingLabel(event, relativeNow)}
                         </span>
                       ) : null}
                       {event.repeatCount && event.repeatCount > 1 ? (
-                        <span className="rounded-full border border-terminal-border bg-black/10 px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-terminal-muted">
+                        <span className="rounded border border-terminal-border bg-black/10 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-widest text-terminal-muted">
                           x{event.repeatCount}
                         </span>
                       ) : null}
                     </div>
-                    <p className="mt-2 text-sm text-terminal-text">{event.detail}</p>
+                    <p className="mt-1 text-xs text-terminal-text leading-snug">{event.detail}</p>
                   </div>
                 </div>
                 <span
-                  className="text-[11px] uppercase tracking-[0.14em] text-terminal-muted"
+                  className="text-[9px] uppercase tracking-widest text-terminal-muted shrink-0"
                   title={new Date(event.occurredAt).toLocaleString()}
                 >
                   {formatRecentEventRelativeTime(event.occurredAt, relativeNow)}

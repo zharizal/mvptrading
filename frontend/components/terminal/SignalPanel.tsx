@@ -1,6 +1,5 @@
 import { MarketSnapshot } from "@/lib/types";
 import { SetupQualityPanel } from "./SetupQualityPanel";
-import { PremiumPanelHeader } from "./PremiumPanelHeader";
 
 const directionStyles = {
   BUY: "border-green-500/20 bg-green-500/10 text-terminal-green",
