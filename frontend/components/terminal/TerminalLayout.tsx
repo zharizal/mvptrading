@@ -33,6 +33,30 @@ interface TerminalLayoutProps {
   providerLabel?: string;
 }
 
+function precisionFor(symbol: string): number {
+  const s = symbol.toUpperCase();
+  if (s.includes("IDR")) return 2;
+  if (s.endsWith("JPY") || s.endsWith("/JPY")) return 3;
+  if (
+    s.startsWith("EUR/") ||
+    s.startsWith("GBP/") ||
+    s.startsWith("AUD/") ||
+    s.startsWith("USD/")
+  )
+    return 5;
+  if (s.includes("XAU") || s.includes("XAG")) return 2;
+  if (s.endsWith("USDT") || s.endsWith("USD")) return 2;
+  return 5;
+}
+
+function fmt(value: number | undefined | null, digits: number): string {
+  if (value === null || value === undefined || !Number.isFinite(value)) return "—";
+  return value.toLocaleString(undefined, {
+    minimumFractionDigits: digits,
+    maximumFractionDigits: digits,
+  });
+}
+
 export function TerminalLayout({
   snapshot,
   selectedWatchSymbol,
@@ -56,6 +80,7 @@ export function TerminalLayout({
   providerLabel,
 }: TerminalLayoutProps) {
   const lastCandle = snapshot.candles?.[snapshot.candles.length - 1];
+  const prec = precisionFor(snapshot.resolved_symbol);
 
   return (
     <main className="flex h-screen w-full flex-col overflow-hidden bg-terminal-bg text-terminal-text font-sans">
@@ -113,17 +138,17 @@ export function TerminalLayout({
              </div>
              <div className="h-4 w-px bg-terminal-border" />
              <div className="flex gap-3 text-terminal-muted">
-                <span>O <span className="text-terminal-text">{lastCandle?.open.toFixed(2) || "—"}</span></span>
-                <span>H <span className="text-terminal-text">{lastCandle?.high.toFixed(2) || "—"}</span></span>
-                <span>L <span className="text-terminal-text">{lastCandle?.low.toFixed(2) || "—"}</span></span>
-                <span>C <span className="text-terminal-text">{lastCandle?.close.toFixed(2) || "—"}</span></span>
-                <span>V <span className="text-terminal-text">{lastCandle?.volume.toFixed(2) || "—"}</span></span>
+                <span>O <span className="text-terminal-text">{fmt(lastCandle?.open, prec)}</span></span>
+                <span>H <span className="text-terminal-text">{fmt(lastCandle?.high, prec)}</span></span>
+                <span>L <span className="text-terminal-text">{fmt(lastCandle?.low, prec)}</span></span>
+                <span>C <span className="text-terminal-text">{fmt(lastCandle?.close, prec)}</span></span>
+                <span>V <span className="text-terminal-text">{lastCandle?.volume ? lastCandle.volume.toLocaleString(undefined, { maximumFractionDigits: 0 }) : "—"}</span></span>
              </div>
              <div className="h-4 w-px bg-terminal-border" />
              <div className="flex gap-3 text-terminal-muted">
-                <span>Pivot <span className="text-terminal-cyan">{snapshot.pivot.toLocaleString()}</span></span>
-                <span>Sup <span className="text-terminal-green">{snapshot.support.toLocaleString()}</span></span>
-                <span>Res <span className="text-terminal-red">{snapshot.resistance.toLocaleString()}</span></span>
+                <span>Pivot <span className="text-terminal-cyan">{fmt(snapshot.pivot, prec)}</span></span>
+                <span>Sup <span className="text-terminal-green">{fmt(snapshot.support, prec)}</span></span>
+                <span>Res <span className="text-terminal-red">{fmt(snapshot.resistance, prec)}</span></span>
              </div>
           </div>
 
