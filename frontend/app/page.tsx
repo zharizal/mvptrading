@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { LiveTerminal } from "@/components/terminal/LiveTerminal";
 import { getSnapshot } from "@/lib/api";
 import { mockSnapshot } from "@/lib/mock";
@@ -7,7 +8,7 @@ interface HomePageProps {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }
 
-export default async function HomePage({ searchParams }: HomePageProps) {
+async function TerminalView({ searchParams }: HomePageProps) {
   const resolvedSearchParams = searchParams ? await searchParams : undefined;
   const initialSymbol = getInitialSymbolFromSearchParams(resolvedSearchParams);
 
@@ -30,4 +31,12 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       />
     );
   }
+}
+
+export default function HomePage(props: HomePageProps) {
+  return (
+    <Suspense fallback={null}>
+      <TerminalView {...props} />
+    </Suspense>
+  );
 }

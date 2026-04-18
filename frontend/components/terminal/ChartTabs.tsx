@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 
 import { Tabs, type TabItem } from "@/components/ui/Tabs";
 import { AnalyticsTab } from "@/features/analytics/AnalyticsTab";
@@ -27,8 +27,6 @@ function parseTab(value: string | null | undefined): TabId {
 }
 
 export function ChartTabs({ snapshot, signalFlash, zoneFlash }: ChartTabsProps) {
-  const router = useRouter();
-  const pathname = usePathname();
   const searchParams = useSearchParams();
 
   const [activeId, setActiveId] = useState<TabId>(() =>
@@ -46,16 +44,20 @@ export function ChartTabs({ snapshot, signalFlash, zoneFlash }: ChartTabsProps) 
       const next = parseTab(id);
       setActiveId(next);
 
-      const params = new URLSearchParams(searchParams.toString());
-      if (next === "signal") {
-        params.delete(TAB_QUERY_KEY);
-      } else {
-        params.set(TAB_QUERY_KEY, next);
+      // Use replaceState directly to avoid Next.js router re-rendering the
+      // entire page on every tab click — which was the root cause of
+      // "This page couldn't load" during rapid symbol/tab switching.
+      if (typeof window !== "undefined") {
+        const url = new URL(window.location.href);
+        if (next === "signal") {
+          url.searchParams.delete(TAB_QUERY_KEY);
+        } else {
+          url.searchParams.set(TAB_QUERY_KEY, next);
+        }
+        window.history.replaceState(null, "", url.toString());
       }
-      const qs = params.toString();
-      router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
     },
-    [router, pathname, searchParams],
+    [],
   );
 
   const items: TabItem[] = useMemo(
@@ -69,7 +71,7 @@ export function ChartTabs({ snapshot, signalFlash, zoneFlash }: ChartTabsProps) 
   );
 
   return (
-    <section className="rounded-2xl border border-terminal-border bg-terminal-panel p-4 shadow-glow">
+    <section className="rounded border border-terminal-border bg-terminal-panel p-3">
       <Tabs
         items={items}
         activeId={activeId}

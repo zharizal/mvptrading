@@ -227,26 +227,20 @@ export function LiveTerminal({
 
     persistBackendSymbol(activeBackendSymbol);
 
-    const currentQuery = searchParams.toString();
-    if (skipNextUrlSyncRef.current && !currentQuery) {
-      skipNextUrlSyncRef.current = false;
-      return;
-    }
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      if (activeBackendSymbol === DEFAULT_BACKEND_SYMBOL) {
+        url.searchParams.delete(TERMINAL_SYMBOL_QUERY_KEY);
+      } else {
+        url.searchParams.set(TERMINAL_SYMBOL_QUERY_KEY, activeBackendSymbol);
+      }
 
-    const params = new URLSearchParams(currentQuery);
-    if (activeBackendSymbol === DEFAULT_BACKEND_SYMBOL) {
-      params.delete(TERMINAL_SYMBOL_QUERY_KEY);
-    } else {
-      params.set(TERMINAL_SYMBOL_QUERY_KEY, activeBackendSymbol);
+      const nextUrl = url.toString();
+      if (nextUrl !== window.location.href) {
+        window.history.replaceState(null, "", nextUrl);
+      }
     }
-
-    const nextQuery = params.toString();
-    if (nextQuery === currentQuery) {
-      return;
-    }
-
-    router.replace(nextQuery ? `${pathname}?${nextQuery}` : pathname, { scroll: false });
-  }, [activeBackendSymbol, pathname, router, searchParams]);
+  }, [activeBackendSymbol]);
 
   useEffect(() => {
     let socket: WebSocket | null = null;
