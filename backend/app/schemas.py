@@ -42,6 +42,7 @@ class SnapshotResponse(BaseModel):
     signal: SignalState
     reasoning: str
     updated_at: datetime
+    candles: list[dict] = Field(default_factory=list)
 
 
 def seeded_snapshot(symbol: str) -> SnapshotResponse:

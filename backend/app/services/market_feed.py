@@ -128,6 +128,7 @@ def build_live_snapshot(
         signal=signal,
         reasoning=reasoning,
         updated_at=datetime.now(timezone.utc),
+        candles=candles or [],
     )
 
 

@@ -14,6 +14,14 @@ export interface SignalState {
   status: string;
 }
 
+export interface Candle {
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+  timestamp?: number;
+}
+
 export interface MarketSnapshot {
   symbol: string;
   requested_symbol: string;
@@ -37,4 +45,5 @@ export interface MarketSnapshot {
   signal: SignalState;
   reasoning: string;
   updated_at: string;
+  candles?: Candle[];
 }

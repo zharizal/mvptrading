@@ -1,5 +1,5 @@
 import { MarketSnapshot } from "@/lib/types";
-import { TradingViewEmbed } from "./TradingViewEmbed";
+import { NativeChart } from "./NativeChart";
 import { PremiumPanelHeader } from "./PremiumPanelHeader";
 
 interface ChartPanelProps {
@@ -113,12 +113,9 @@ export function ChartPanel({
           {snapshot.zone_context}
         </span>
       </div>
-      <TradingViewEmbed
-        symbol={
-          tradingviewSymbol ??
-          `BINANCE:${snapshot.resolved_symbol.replace(/[-/]/g, "")}`
-        }
-      />
+      <div className="mt-4 overflow-hidden rounded-xl border border-terminal-border/50 bg-black/20" style={{ height: "400px" }}>
+        <NativeChart snapshot={snapshot} />
+      </div>
     </section>
   );
 }
