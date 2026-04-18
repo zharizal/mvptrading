@@ -20,58 +20,49 @@ export function SignalPanel({ snapshot, signalFlash = null, zoneFlash = null }: 
   const statusTone = snapshot.signal.status === "LIVE_FEED" ? "text-terminal-cyan" : "text-yellow-200";
 
   return (
-    <section className="premium-glass rounded-2xl border border-terminal-border bg-terminal-panel p-4 shadow-glow">
-      <PremiumPanelHeader
-        eyebrow="Decision Surface"
-        title="Signal"
-        subtitle="Execution stance, quality, and structure context in one compact block."
-        rightContent={
-          <div className="flex items-center gap-2">
-            <span className={`rounded-full border px-3 py-1 text-xs font-semibold ${directionStyles[snapshot.signal.direction]} ${signalFlash === "active" ? "micro-pulse-cyan" : ""}`}>
-              {snapshot.signal.direction}
-            </span>
-            <span className={`text-xs font-medium uppercase tracking-[0.16em] ${statusTone}`}>{snapshot.signal.status}</span>
-          </div>
-        }
-      />
+    <section className="rounded border border-terminal-border bg-terminal-panel p-3">
+      <div className="mb-4 flex items-center justify-between border-b border-terminal-border pb-2">
+        <h2 className="text-xs font-semibold uppercase tracking-widest text-terminal-muted">Signal</h2>
+        <div className="flex items-center gap-2">
+          <span className={`text-[10px] font-semibold uppercase tracking-widest ${statusTone}`}>{snapshot.signal.status}</span>
+          <span className={`rounded border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-widest ${directionStyles[snapshot.signal.direction]} ${signalFlash === "active" ? "micro-pulse-cyan" : ""}`}>
+            {snapshot.signal.direction}
+          </span>
+        </div>
+      </div>
 
-      <div className="mt-4 grid gap-3 md:grid-cols-4">
-        <div className="premium-glass rounded-xl border border-terminal-border px-3 py-3 shadow-glow">
-          <p className="text-xs uppercase tracking-[0.16em] text-terminal-muted">Score</p>
-          <p className="mt-2 text-2xl font-semibold text-terminal-text">{snapshot.score}/100</p>
+      <div className="mb-4 grid gap-2 sm:grid-cols-4">
+        <div className="rounded border border-terminal-border bg-black/20 p-2">
+          <p className="text-[10px] uppercase tracking-widest text-terminal-muted">Score</p>
+          <p className="mt-1 text-base font-medium text-terminal-text tabular-nums">{snapshot.score}/100</p>
         </div>
-        <div className="premium-glass rounded-xl border border-terminal-border px-3 py-3 shadow-glow">
-          <p className="text-xs uppercase tracking-[0.16em] text-terminal-muted">Bias</p>
-          <p className="mt-2 text-lg font-semibold text-terminal-green">{snapshot.bias}</p>
+        <div className="rounded border border-terminal-border bg-black/20 p-2">
+          <p className="text-[10px] uppercase tracking-widest text-terminal-muted">Bias</p>
+          <p className="mt-1 text-sm font-medium text-terminal-green">{snapshot.bias}</p>
         </div>
-        <div className="premium-glass rounded-xl border border-terminal-border px-3 py-3 shadow-glow">
-          <p className="text-xs uppercase tracking-[0.16em] text-terminal-muted">R/R</p>
-          <p className="mt-2 text-lg font-semibold text-terminal-cyan">{snapshot.signal.risk_reward.toFixed(2)}</p>
+        <div className="rounded border border-terminal-border bg-black/20 p-2">
+          <p className="text-[10px] uppercase tracking-widest text-terminal-muted">R/R</p>
+          <p className="mt-1 text-sm font-medium text-terminal-cyan tabular-nums">{snapshot.signal.risk_reward.toFixed(2)}</p>
         </div>
-        <div className="premium-glass rounded-xl border border-terminal-border px-3 py-3 shadow-glow">
-          <p className="text-xs uppercase tracking-[0.16em] text-terminal-muted">Zone</p>
-          <div className="mt-2">
-            <span className={`rounded-full border px-3 py-1 text-xs font-semibold ${zoneStyles[snapshot.zone_context]} ${zoneFlash === "active" ? "micro-pulse-cyan" : ""}`}>
+        <div className={`rounded border border-terminal-border bg-black/20 p-2 ${zoneFlash === "active" ? "micro-pulse-cyan" : ""}`}>
+          <p className="text-[10px] uppercase tracking-widest text-terminal-muted">Zone</p>
+          <div className="mt-1">
+            <span className={`truncate text-xs font-medium ${zoneStyles[snapshot.zone_context].replace("border", "border-transparent bg-transparent px-0 py-0")}`}>
               {snapshot.zone_context}
             </span>
           </div>
         </div>
       </div>
 
-      <div className="mt-4 flex flex-wrap gap-2">
-        <span className="rounded-full border border-green-500/20 bg-green-500/10 px-3 py-1 text-xs font-medium text-terminal-green">
-          Support {snapshot.support.toLocaleString()}
-        </span>
-        <span className="rounded-full border border-red-500/20 bg-red-500/10 px-3 py-1 text-xs font-medium text-terminal-red">
-          Resistance {snapshot.resistance.toLocaleString()}
-        </span>
-      </div>
-
-      <div className="mt-4">
+      <div className="mb-4">
         <SetupQualityPanel snapshot={snapshot} />
       </div>
 
-      <p className="mt-4 text-sm leading-6 text-terminal-muted">{snapshot.reasoning}</p>
+      <div className="rounded border border-terminal-cyan/20 bg-terminal-cyan/5 p-3">
+         <p className="text-sm italic leading-relaxed text-terminal-text/90">
+            "{snapshot.reasoning}"
+         </p>
+      </div>
     </section>
   );
 }

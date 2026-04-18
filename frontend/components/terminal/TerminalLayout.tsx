@@ -80,63 +80,36 @@ export function TerminalLayout({
       : snapshot.symbol_mode;
 
   return (
-    <main className="min-h-screen bg-terminal-bg p-6 text-terminal-text">
+    <main className="min-h-screen bg-terminal-bg p-4 text-terminal-text">
       <div className="mx-auto max-w-[1600px]">
-        <header className="mb-6 flex flex-col gap-4 rounded-2xl border border-terminal-border bg-terminal-panel px-5 py-5 shadow-glow md:flex-row md:items-center md:justify-between">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-terminal-green" />
-              <p className="text-xs uppercase tracking-[0.25em] text-terminal-muted">Sequence-style MVP</p>
-            </div>
-            <h1 className="mt-2 text-2xl font-semibold">AI Trading Terminal</h1>
-            <p className="mt-1 text-sm text-terminal-muted">Realtime decision surface with chart, scoring, and AI reasoning</p>
+        <header className="mb-4 flex flex-col gap-2 rounded-xl border border-terminal-border bg-terminal-panel px-4 py-3 md:flex-row md:items-center md:justify-between">
+          <div className="flex items-center gap-3">
+            <span className="h-2 w-2 rounded-full bg-terminal-cyan" />
+            <h1 className="text-sm font-semibold tracking-wide">Terminal MVP</h1>
           </div>
           <div className="flex flex-wrap items-center gap-2 md:justify-end">
-            <span className={`rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] ${connectionTone[connectionStatus]}`}>
+            <span className={`flex items-center gap-1.5 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${connectionTone[connectionStatus]}`}>
+              <span className={`h-1.5 w-1.5 rounded-full ${connectionStatus === "live" ? "bg-terminal-green" : "bg-current"}`} />
               {connectionLabel[connectionStatus]}
             </span>
-            <span className="rounded-full border border-terminal-border bg-black/10 px-3 py-1 text-xs font-medium text-terminal-muted">
-              {snapshot.resolved_symbol}
+            <span className="px-2 py-0.5 text-[10px] font-medium text-terminal-muted border-l border-terminal-border">
+              REQ: {snapshot.requested_symbol}
             </span>
-            <span className="rounded-full border border-cyan-500/20 bg-cyan-500/10 px-3 py-1 text-xs font-medium text-terminal-cyan">
-              Focus {selectedWatchSymbol.symbol} · {focusModeLabel}
-            </span>
-            <span className="rounded-full border border-terminal-border bg-black/10 px-3 py-1 text-xs font-medium text-terminal-muted">
-              Request {snapshot.requested_symbol} → Resolved {snapshot.resolved_symbol}
-            </span>
+            {latestTickLabel ? (
+              <span className="px-2 py-0.5 text-[10px] font-medium text-terminal-muted border-l border-terminal-border">
+                {latestTickLabel}
+              </span>
+            ) : null}
           </div>
         </header>
 
-        <section className="mb-6 rounded-2xl border border-terminal-border bg-terminal-panel px-5 py-4 shadow-glow">
-          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            <div className="flex flex-wrap items-center gap-3">
-              <div>
-                <p className="text-xs uppercase tracking-[0.18em] text-terminal-muted">Data Source</p>
-                <p className={`mt-1 text-sm font-medium ${statusTone}`}>{statusLabel}</p>
-              </div>
-              {latestTickLabel ? (
-                <div className="rounded-full border border-terminal-border bg-black/10 px-3 py-1 text-xs font-medium text-terminal-muted">
-                  Last tick {latestTickLabel}
-                </div>
-              ) : null}
-            </div>
-            <div className="flex flex-wrap items-center gap-2 text-sm text-terminal-muted md:justify-end">
-              <span className="rounded-full border border-terminal-border bg-black/10 px-3 py-1 text-xs font-medium uppercase tracking-[0.16em] text-terminal-muted">
-                15m execution context
-              </span>
-              <span>
-                Updated at <span className="text-terminal-text">{new Date(snapshot.updated_at).toLocaleString()}</span>
-              </span>
-            </div>
+        {fetchError ? (
+          <div className="mb-4 rounded border border-yellow-500/20 bg-yellow-500/10 px-3 py-2 text-xs text-yellow-200">
+            Fallback Mode: {fetchError}
           </div>
-          {fetchError ? (
-            <p className="mt-3 rounded-lg border border-yellow-500/20 bg-yellow-500/10 px-3 py-2 text-sm text-yellow-200">
-              Backend fetch failed, jadi sementara pakai snapshot terakhir/mock data. Detail: {fetchError}
-            </p>
-          ) : null}
-        </section>
+        ) : null}
 
-        <section className="mb-6 grid gap-4 md:grid-cols-2 xl:grid-cols-6">
+        <section className="mb-4 grid gap-3 md:grid-cols-2 xl:grid-cols-6">
           <MetricCard
             label="Price"
             value={`$${snapshot.price.toLocaleString()}`}
@@ -147,8 +120,8 @@ export function TerminalLayout({
           <MetricCard label="24H High" value={`$${snapshot.high_24h.toLocaleString()}`} />
           <MetricCard label="24H Low" value={`$${snapshot.low_24h.toLocaleString()}`} />
           <MetricCard label="Pivot" value={`$${snapshot.pivot.toLocaleString()}`} accent="cyan" changeHint={`ATR ${snapshot.atr_14_pct.toFixed(2)}%`} />
-          <MetricCard label="Support" value={`$${snapshot.support.toLocaleString()}`} accent="green" changeHint={snapshot.zone_context === "SUPPORT" ? "Active structure" : undefined} />
-          <MetricCard label="Resistance" value={`$${snapshot.resistance.toLocaleString()}`} accent="red" changeHint={snapshot.zone_context === "RESISTANCE" ? "Active structure" : snapshot.zone_context} />
+          <MetricCard label="Support" value={`$${snapshot.support.toLocaleString()}`} accent="green" changeHint={snapshot.zone_context === "SUPPORT" ? "Active" : undefined} />
+          <MetricCard label="Resistance" value={`$${snapshot.resistance.toLocaleString()}`} accent="red" changeHint={snapshot.zone_context === "RESISTANCE" ? "Active" : undefined} />
         </section>
 
         <section className="grid gap-6 xl:grid-cols-[280px_minmax(0,1fr)_340px]">

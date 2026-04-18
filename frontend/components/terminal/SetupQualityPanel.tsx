@@ -102,32 +102,28 @@ export function SetupQualityPanel({ snapshot }: { snapshot: MarketSnapshot }) {
   const checks = getExecutionChecks(snapshot);
 
   return (
-    <div className="premium-glass rounded-xl border border-terminal-border bg-black/10 p-3 shadow-glow">
-      <PremiumPanelHeader
-        eyebrow="Execution Quality"
-        title="Setup Checklist"
-        subtitle="Compact read on whether this setup deserves action now."
-        rightContent={
-          <span className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] ${quality.tone}`}>
-            {quality.label}
-          </span>
-        }
-      />
+    <div className="rounded border border-terminal-border bg-black/10 p-3">
+      <div className="mb-3 flex items-center justify-between">
+        <h3 className="text-xs font-semibold uppercase tracking-widest text-terminal-muted">Checklist</h3>
+        <span className={`inline-flex rounded border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-widest ${quality.tone}`}>
+          {quality.label}
+        </span>
+      </div>
 
-      <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
         {checks.map((check) => (
-          <div key={check.label} className={`rounded-xl border border-terminal-border px-3 py-3 ${statusTone[check.status].card}`}>
-            <div className="flex items-center justify-between gap-2">
-              <span className="truncate text-xs font-semibold uppercase tracking-[0.16em] text-terminal-muted" title={check.label}>
+          <div key={check.label} className={`rounded border border-terminal-border px-2 py-2 ${statusTone[check.status].card}`}>
+            <div className="flex items-center justify-between gap-1.5 border-b border-terminal-border/50 pb-1 mb-1.5">
+              <span className="truncate text-[10px] font-semibold uppercase tracking-widest text-terminal-muted" title={check.label}>
                 {check.label}
               </span>
-              <span className={`shrink-0 inline-flex rounded-full border px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] ${statusTone[check.status].chip}`}>
+              <span className={`shrink-0 inline-flex rounded border px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-widest ${statusTone[check.status].chip}`}>
                 {check.status}
               </span>
             </div>
-            <div className="mt-3 flex items-start gap-2">
-              <span className={`mt-1 h-2 w-2 rounded-full ${statusTone[check.status].dot}`} />
-              <p className="text-sm text-terminal-text">{check.detail}</p>
+            <div className="flex items-start gap-1.5">
+              <span className={`mt-1 h-1.5 w-1.5 shrink-0 rounded-full ${statusTone[check.status].dot}`} />
+              <p className="text-[11px] text-terminal-text leading-snug">{check.detail}</p>
             </div>
           </div>
         ))}

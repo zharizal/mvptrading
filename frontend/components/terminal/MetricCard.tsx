@@ -21,12 +21,12 @@ const flashMap = {
 
 export function MetricCard({ label, value, accent = "default", changeHint, flash = null }: MetricCardProps) {
   return (
-    <section className={`premium-glass rounded-2xl border border-terminal-border bg-terminal-panel p-4 shadow-glow transition-all ${flashMap[String(flash) as keyof typeof flashMap]}`}>
-      <div className="flex items-start justify-between gap-3">
-        <p className="text-xs uppercase tracking-[0.18em] text-terminal-muted">{label}</p>
-        {changeHint ? <span className="rounded-full border border-white/5 bg-white/5 px-2 py-1 text-[11px] font-medium text-terminal-muted">{changeHint}</span> : null}
+    <section className={`rounded-xl border border-terminal-border bg-terminal-panel p-3 transition-all ${flashMap[String(flash) as keyof typeof flashMap]}`}>
+      <div className="flex items-start justify-between gap-2">
+        <p className="text-[10px] uppercase tracking-widest text-terminal-muted">{label}</p>
+        {changeHint ? <span className="text-[10px] font-medium text-terminal-muted/70">{changeHint}</span> : null}
       </div>
-      <p className={`mt-3 text-xl font-semibold ${accentMap[accent]}`}>{value}</p>
+      <p className={`mt-1 text-lg font-semibold tabular-nums ${accentMap[accent]}`}>{value}</p>
     </section>
   );
 }

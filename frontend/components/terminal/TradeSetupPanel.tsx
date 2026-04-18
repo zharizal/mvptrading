@@ -43,9 +43,9 @@ function getTakeProfitContext(snapshot: MarketSnapshot) {
 export function TradeSetupPanel({ snapshot }: { snapshot: MarketSnapshot }) {
   const rows = [
     ["Direction", snapshot.signal.direction],
-    ["Entry", snapshot.signal.entry.toFixed(2)],
-    ["Stop Loss", snapshot.signal.stop_loss.toFixed(2)],
-    ["Take Profit", snapshot.signal.take_profit.toFixed(2)],
+    ["Entry", snapshot.signal.entry.toFixed(5)],
+    ["Stop Loss", snapshot.signal.stop_loss.toFixed(5)],
+    ["Take Profit", snapshot.signal.take_profit.toFixed(5)],
     ["R/R", snapshot.signal.risk_reward.toFixed(2)],
     ["Status", snapshot.signal.status],
   ] as const;
@@ -54,35 +54,29 @@ export function TradeSetupPanel({ snapshot }: { snapshot: MarketSnapshot }) {
   const takeProfitContext = getTakeProfitContext(snapshot);
 
   return (
-    <section className="premium-glass rounded-2xl border border-terminal-border bg-terminal-panel p-4 shadow-glow">
-      <PremiumPanelHeader
-        eyebrow="Execution Grid"
-        title="Trade Setup"
-        subtitle="Structure-aware levels with cleaner hierarchy for entry, risk, and target context."
-        rightContent={<span className={`text-sm font-semibold ${directionTone[snapshot.signal.direction]}`}>{snapshot.signal.direction}</span>}
-      />
-
-      <div className="mt-4 flex flex-wrap gap-2">
-        <span className={`rounded-full border px-3 py-1 text-xs font-semibold ${zoneTone[snapshot.zone_context]}`}>
-          Zone {snapshot.zone_context}
-        </span>
-        <span className="rounded-full border border-green-500/20 bg-green-500/10 px-3 py-1 text-xs font-medium text-terminal-green">
-          Support {snapshot.support.toLocaleString()}
-        </span>
-        <span className="rounded-full border border-red-500/20 bg-red-500/10 px-3 py-1 text-xs font-medium text-terminal-red">
-          Resistance {snapshot.resistance.toLocaleString()}
+    <section className="rounded border border-terminal-border bg-terminal-panel p-3">
+      <div className="mb-3 flex items-center justify-between border-b border-terminal-border pb-2">
+        <h2 className="text-xs font-semibold uppercase tracking-widest text-terminal-muted">Trade Setup</h2>
+        <span className={`text-[10px] font-semibold uppercase tracking-widest ${directionTone[snapshot.signal.direction]}`}>
+          {snapshot.signal.direction}
         </span>
       </div>
 
-      <div className="mt-4 space-y-3">
+      <div className="mb-4 flex flex-wrap gap-1.5">
+        <span className={`rounded border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-widest ${zoneTone[snapshot.zone_context]}`}>
+          {snapshot.zone_context}
+        </span>
+      </div>
+
+      <div className="space-y-1">
         {rows.map(([label, value]) => (
-          <div key={label} className="premium-glass flex items-center justify-between rounded-xl border border-terminal-border bg-black/10 px-3 py-3 text-sm shadow-glow">
+          <div key={label} className="flex items-center justify-between rounded px-2 py-1.5 text-xs hover:bg-white/5">
             <div>
               <span className="text-terminal-muted">{label}</span>
-              {label === "Stop Loss" ? <p className="mt-1 text-[11px] uppercase tracking-[0.14em] text-terminal-muted">{stopContext}</p> : null}
-              {label === "Take Profit" ? <p className="mt-1 text-[11px] uppercase tracking-[0.14em] text-terminal-muted">{takeProfitContext}</p> : null}
+              {label === "Stop Loss" ? <p className="text-[9px] uppercase tracking-widest text-terminal-muted/60">{stopContext}</p> : null}
+              {label === "Take Profit" ? <p className="text-[9px] uppercase tracking-widest text-terminal-muted/60">{takeProfitContext}</p> : null}
             </div>
-            <span className={`font-medium ${label === "Direction" ? directionTone[snapshot.signal.direction] : "text-terminal-text"}`}>
+            <span className={`font-medium tabular-nums ${label === "Direction" ? directionTone[snapshot.signal.direction] : "text-terminal-text"}`}>
               {value}
             </span>
           </div>
