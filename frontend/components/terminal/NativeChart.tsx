@@ -1,8 +1,6 @@
 "use client";
 
-"use client";
-
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { MarketSnapshot } from "@/lib/types";
 
 interface NativeChartProps {
@@ -17,18 +15,18 @@ declare global {
 }
 
 export function NativeChart({ snapshot, tradingviewSymbol }: NativeChartProps) {
-  const containerId = "tv_chart_container";
-  // Fallback to BINANCE if tradingviewSymbol is missing
+  // Use a unique container ID per symbol so React fully unmounts the previous iframe
   const symbol = tradingviewSymbol ?? `BINANCE:${snapshot.resolved_symbol.replace(/[-/]/g, "")}`;
+  const containerId = `tv_chart_${symbol.replace(/[^A-Z0-9]/g, "")}`;
   const scriptId = "tv_script_id";
 
   useEffect(() => {
-    // Append the script only once
     if (!document.getElementById(scriptId)) {
       const script = document.createElement("script");
       script.id = scriptId;
       script.type = "text/javascript";
       script.src = "https://s3.tradingview.com/tv.js";
+      script.async = true;
       document.head.appendChild(script);
     }
   }, []);
@@ -38,6 +36,9 @@ export function NativeChart({ snapshot, tradingviewSymbol }: NativeChartProps) {
     let tvTimer: NodeJS.Timeout;
 
     const createWidget = () => {
+      const container = document.getElementById(containerId);
+      if (!container) return; // Unmounted
+
       if (typeof window.TradingView !== "undefined") {
         tvWidget = new window.TradingView.widget({
           autosize: true,
@@ -55,7 +56,6 @@ export function NativeChart({ snapshot, tradingviewSymbol }: NativeChartProps) {
           save_image: false,
           container_id: containerId,
           toolbar_bg: "#131722",
-          // Adding advanced tools
           allow_symbol_change: true,
           details: true,
           hotlist: true,
@@ -74,11 +74,13 @@ export function NativeChart({ snapshot, tradingviewSymbol }: NativeChartProps) {
 
     return () => {
       clearTimeout(tvTimer);
-      if (tvWidget && tvWidget.remove) {
+      if (tvWidget && typeof tvWidget.remove === "function") {
         tvWidget.remove();
       }
     };
-  }, [symbol]);
+  }, [symbol, containerId]);
 
-  return <div id={containerId} className="h-full w-full" />;
+  return (
+    <div key={containerId} className="h-full w-full" id={containerId} />
+  );
 }
